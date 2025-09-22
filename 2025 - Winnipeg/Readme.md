@@ -5,6 +5,7 @@ This repository contains resources and links related to the session.
 
 ## Session Content
 - [PBI - FindAllDependencyIds](/2025%20-%20Winnipeg/PBI%20-%20FindAllDependencyIds.txt)
+- [Table Structure](/2025%20-%20Winnipeg/Table%20Metadata.md)
 
 ## Other Links
 - [COBIT - Grid](https://www.infotech.com/browse/management-and-governance)
