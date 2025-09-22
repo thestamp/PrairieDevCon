@@ -1,0 +1,88 @@
+## Business Units
+- Title
+- Area
+
+## Business Capabilities
+- Title
+- Group
+- Description
+- Criticality
+- Business Units
+
+## Application Inventory
+- Title
+- Primary Components
+- Description
+- Ownership and Visibility
+    - Managed
+    - Unmanaged
+    - Unknown
+    - Unsanctioned
+- App Type
+    - Vendor
+    - In-House
+    - Vendor Customized
+- Primary Platform
+    - On Prem
+    - Cloud
+- Product Owner
+- SMEs
+- Primary Analyst
+- SLA Contact
+- Vendor Information
+- Link - Documentation
+- Lifecycle Stage
+    - Pre-Release
+    - Growth
+    - Mature
+    - End of Life
+    - Deprecated
+- Fit
+    - Good Fit
+    - OK Fit
+    - Poor Fit
+- Business Capabilities
+    - Or Services
+
+## Component
+- Title
+- Component Type
+    - Web Application
+    - Desktop Application
+    - Server
+    - Network
+    - Data Pipeline – Automated
+    - Data Pipeline – Client Initiated
+    - Data Pipeline – Manual
+    - Data Store
+    - Background System
+    - Web Proxy
+    - File Share
+    - Certificate
+- Link - Production
+- Link - Sandbox
+- Ownership and Visibility
+    - Unmanaged
+    - Managed
+    - Unknown
+    - Unsanctioned
+- Solution Type
+    - In-House Software
+    - Vendor Software
+    - Vendor Customized
+    - Batch Script
+    - Document-Driven
+- Lifecycle Stage
+    - Pre-Release
+    - Growth
+    - Mature
+    - End of Life
+    - Deprecated
+- Fit
+    - Good Fit
+    - OK Fit
+    - Poor Fit
+- Description
+- Dependancies
+- Link - Documentation
+
