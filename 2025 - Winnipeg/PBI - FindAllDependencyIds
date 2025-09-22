@@ -1,0 +1,170 @@
+= (Depth as number) =>
+let
+    // Source data
+    Source = DirectComponentDependencies,
+    
+    // Create a simple dependency map for faster lookup
+    DependencyMap = Table.Group(
+        Source, 
+        {"Dependency Id"}, 
+        {{"DependentComponentIds", each List.Distinct([Component Id]), type list}}
+    ),
+    
+    // Buffer for better performance
+    BufferedDependencyMap = Table.Buffer(DependencyMap),
+    BufferedSource = Table.Buffer(Source),
+    
+    // Get distinct dependency IDs to process
+    DistinctDependencyIds = List.Distinct(Source[Dependency Id]),
+    
+    // Also get all distinct component IDs to ensure we include components with no dependents
+    DistinctComponentIds = List.Distinct(Source[Component Id]),
+    
+    // Identify components that never appear as dependencies
+    ComponentsWithNoDependents = List.Difference(
+        DistinctComponentIds,
+        DistinctDependencyIds
+    ),
+    
+    // Function to get components that depend on a dependency ID with their direct dependencies
+    GetDependentComponentsWithDependencies = (dependencyId) =>
+        let
+            // Find all rows where this is the dependency
+            Rows = Table.SelectRows(BufferedSource, each [Dependency Id] = dependencyId),
+            // Extract component IDs and create records with dependency information
+            DependentComponents = List.Transform(
+                Table.ToRecords(Rows),
+                each [
+                    Component_Id = _[Component Id],
+                    Dependency_Id = dependencyId
+                ]
+            )
+        in
+            DependentComponents,
+    
+    // Function to process a single dependency
+    ProcessDependency = (sourceDepId) as table =>
+        let
+            // Track visited components to avoid cycles
+            Visited = {sourceDepId},
+            
+            // Process one level at a time
+            ProcessOneLevel = (currentComponents, currentDepth, resultsAccumulator) =>
+                let
+                    // Stop if we've reached max depth
+                    ShouldStop = currentDepth > Depth,
+                    
+                    // Extract just the component IDs from the current components
+                    CurrentComponentIds = List.Transform(currentComponents, each _[Component_Id]),
+                    
+                    // Get all components that depend on current components with their dependencies
+                    AllDependentComponents = if ShouldStop then {} else
+                        List.Combine(
+                            List.Transform(
+                                CurrentComponentIds,
+                                each GetDependentComponentsWithDependencies(_)
+                            )
+                        ),
+                    
+                    // Extract just the component IDs for visited check
+                    AllDependentComponentIds = List.Transform(AllDependentComponents, each _[Component_Id]),
+                    
+                    // Filter out components we've already seen
+                    NewComponents = if ShouldStop then {} else
+                        List.Select(
+                            AllDependentComponents, 
+                            each not List.Contains(Visited, _[Component_Id])
+                        ),
+                    
+                    // Extract new component IDs for updating visited list
+                    NewComponentIds = List.Transform(NewComponents, each _[Component_Id]),
+                    
+                    // Add source information to the new components
+                    LevelResults = List.Transform(
+                        NewComponents,
+                        each Record.Combine({
+                            _,
+                            [Source_Dependency_Id = sourceDepId,
+                             Source_Depth = currentDepth]
+                        })
+                    ),
+                    
+                    // Combine with previous results
+                    CombinedResults = List.Combine({resultsAccumulator, LevelResults}),
+                    
+                    // Update visited list
+                    UpdatedVisited = List.Combine({Visited, NewComponentIds}),
+                    
+                    // Continue to next level or return results
+                    Result = if ShouldStop or List.IsEmpty(NewComponents) then 
+                                CombinedResults
+                            else
+                                @ProcessOneLevel(NewComponents, currentDepth + 1, CombinedResults)
+                in
+                    Result,
+            
+            // Add self-dependency record (component depends on itself)
+            SelfDependency = {[
+                Component_Id = sourceDepId,
+                Dependency_Id = sourceDepId,
+                Source_Dependency_Id = sourceDepId,
+                Source_Depth = 0
+            ]},
+            
+            // Get direct dependencies (level 1)
+            DirectDependents = GetDependentComponentsWithDependencies(sourceDepId),
+            
+            // Add source information to level 1 records
+            Level1Results = List.Transform(
+                DirectDependents,
+                each Record.Combine({
+                    _,
+                    [Source_Dependency_Id = sourceDepId,
+                     Source_Depth = 1]
+                })
+            ),
+            
+            // Extract component IDs for the visited list
+            DirectDependentIds = List.Transform(DirectDependents, each _[Component_Id]),
+            InitialVisited = List.Combine({Visited, DirectDependentIds}),
+            
+            // Process remaining levels
+            AllResults = ProcessOneLevel(DirectDependents, 2, List.Combine({SelfDependency, Level1Results})),
+            
+            // Convert to table
+            ResultTable = if List.IsEmpty(AllResults) then 
+                            #table({"Component_Id", "Dependency_Id", "Source_Dependency_Id", "Source_Depth"}, {})
+                          else
+                            Table.FromRecords(AllResults)
+        in
+            ResultTable,
+    
+    // Process components with no dependents (only self-dependency)
+    NoDependendentsResults = Table.FromRecords(
+        List.Transform(
+            ComponentsWithNoDependents,
+            each [
+                Component_Id = _,
+                Dependency_Id = _,
+                Source_Dependency_Id = _,
+                Source_Depth = 0
+            ]
+        )
+    ),
+    
+    // Process all dependencies
+    HasDependentsResults = List.Accumulate(
+        DistinctDependencyIds,
+        #table({"Component_Id", "Dependency_Id", "Source_Dependency_Id", "Source_Depth"}, {}),
+        (state, dependencyId) => 
+            let
+                DependencyResults = ProcessDependency(dependencyId),
+                Combined = Table.Combine({state, DependencyResults})
+            in
+                Combined
+    ),
+    
+    // Combine both results
+    AllResults = Table.Combine({HasDependentsResults, NoDependendentsResults})
+in
+    AllResults
