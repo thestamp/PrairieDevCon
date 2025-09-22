@@ -9,3 +9,6 @@ This repository contains resources and links related to the session.
 ## Other Links
 - [COBIT - Grid](https://www.infotech.com/browse/management-and-governance)
 - [COBIT - Application Portfolio](https://www.infotech.com/research/ss/rationalize-your-application-portfolio#unlock-modal)
+- [Book - Minimum Viable Enterprise Architecture](https://www.amazon.ca/Minimum-Enterprise-Architecture-Business-Digital-ebook/dp/B0BQMQD6Q7/ 
+)
+
