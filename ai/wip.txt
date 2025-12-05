@@ -1,0 +1,146 @@
+
+https://www.youtube.com/watch?v=pwWBcsxEoLk
+https://www.youtube.com/watch?v=8_7Sq6Vu0S4
+
+https://www.youtube.com/watch?v=yMOmmnjy3sE
+
+https://www.youtube.com/watch?v=yMOmmnjy3sE
+    if you have any questions, do not hesitate to ask me.
+    AI doesn't want to ask, unless you give it permission to.
+
+devops
+https://www.youtube.com/watch?v=QQ4UyZNXof8
+
+Context Engineering
+1) Personas
+    have it make an email
+    then have it make an email with a user/system prompt of what the persona is
+    but notice how it made up some details
+2) Context
+    remember that its a prediction machine
+    if you don't 
+    reducing hallucinations
+    include as musch detail as you can
+    
+        what you NEED from it
+            Give me some ideas for a birthday present under 30$
+            vs
+            Give me 5 ideas for a birthday present/ My budget is $30. The gift is for a 29 year old who loves winter sports, and recently switched from snowboarding to skiiing
+
+    don't skimp on details. be specific, and don't hold back.
+
+    the downside of genAI is that they are eager to please, and so they will fill in the gaps.
+
+    more context = less hallucinations
+
+    but even when you do add more context, there is still a risk of it hallucinating. so.. how do we fix that?
+
+    GenAI has powerful tools at their disposal. But, they are searching the web the same as we are, and could make the same mistakes, such as searching the wrong site, getting bad or old information.
+
+    As it remembers, it will appear that it can remember everything. its not a human, its not going to remember everything you said. its a computer, guessing. 
+        never assume it knows something. 
+        never assume it has all the context.
+        always provide all the context, every time
+
+    give your AI permission to fail
+        explicitly say: if you don't know, can't find the answer or its not in the context, ask me.
+        if you don't say that, it will lie to give its best answer
+        this is the #1 fix for hallucinations as of right now
+
+3) format
+    output requirements:
+        2-Format: use a clear bulleted list for the timeline of events
+        3-Length: keep it under 200 words
+        4-Tone: Profession, apologetic, and radically transparent. No corporate fluff.
+
+    Few shot prompting
+        so far we've been telling it what we need, and giving it guardrails. 
+        insstead of describing the output, we are SHOWING the output
+        By giving it examples of how we want it to look, the genAI will have a MUCH better understanding of how we want it to be formatted
+
+        example 1: technical transparency (provide example)
+        example 2: Timeline Structure (provide example)
+        example 3: Tone & Ownership (provide example)
+
+4) Advanced Techniques
+
+    a) Chain of Thought
+        before (..) think through step by step, then provide the output
+        accuracy goes right up
+        its a prediction engine, and by having it verbalize, it will naturally come to the conclusion that makes the most sense
+        secondly, you get to see exactly how it came to that conclusion
+        its been so successful at improving accuracy that many new models have a "thinking" feature, called a "reasoning" model
+
+        but this is old news, what's new technique?
+    b) Trees of Thought
+        how often does a single chain of thought lead to the right conclusion? 
+        Often, you come to a dead end, a good option, or even a better option.
+        But how do we do this with GenAI, a simple prediction engine?
+
+        Please use the "Tree of Thoughts" reasoning framework to determin the mode effective way to accomplish this. Structure your response exact as follows:
+        Step 1: Brainstorm three distinct (..) approaches for the (..)
+        - Branch A: "Radical Transparency" - heavy emphasic on the detailed technical root cause and timeline
+        - Branch B: "Customer Empathy First" - primary focus on acknowledging the business impact, frustation and erosion of trust
+        - Branch C: "Future-focused assurance" - center the message almost entirely on what has been fixed and the new safeguards implemented.
+
+        Step 2: evaluate each branch objectively:
+        -list clear pros and cons for each approach
+        - specifically analyse: which restores trust most effectively? which risks alienating or confusing non-technical customers? which might invite unwanted scrutiny or speculation?
+
+        Step 3: Synthesize the best elements from all three branches to create an optimal "golden path" strategy that balances transparency, empathy, and confidence-building.
+
+        Step 4: Using the Golden Path, write the complete customer apology email. The email should:
+            be signed by (..)
+            - have a clear, consice subject
+            - use professional, calm and confident language
+            - include appropriate sections (.....)
+            - end on a high note of commitment and gratitude
+
+        Show all your reasoning step-by-step before presenting the final email.
+    c) playoff method (adveserial validation)
+        you are the "prompt engineering Tournament Controller"
+        your task is to generate the perfect (..) 
+        to achieve this, simulate a 3-round competition between three distinct personas:
+        Contestant 1: the engineer - obsessed with technical accuracy, transparency, and factual precision. Hates fluss and vagueness
+        Contestant 2: the PR Crisis manager: focused on protecting brand repuation..
+        COntestant 3: the angry customer: a CTO whos company just lost $50,000+ due to the outage. furious, zero tolerance for excuses, calls out coporate speak instantly. 
+        
+        Round 1: initial drafts
+        - the engineer writes their version of the apology email
+        - the PR Crisis manager writes their version of the apology email
+        (do not write the angry customer yet)
+
+        Round 2: the roast
+        - the angry customer reads both drafts and brutally critiques them.
+        - they must point out every excuse, every vague or evasive sentence, every tone-deaf moment, and anything that feels insincere or inadequate.
+
+        Round 3: the synthesis
+        - the engineer and PR Crisis manager read the angry customer's feedback.
+        - they collaborate (you show their brief discussion if helpful) and produce ONE final, unified apology email that fully addresses every single criticism raised in round 2.
+        output format:
+
+        1) clearly label and present the full dialogue and drafts for all three rounds
+        2) After round 3, separately display the final apology email in clean, ready-to-send format (with proper subject line, greeting, signature, etc.)
+        (Begin the tournament now)
+
+5) the meta-skill
+    a) persona
+        Where's the source of knowledge coming from? What's the perspective?
+    b) context
+        That context forces us to say, what are the facts?  What does it need to know?
+    c) Chain of Thought
+        how the logic will flow. how would we do it? how would we describe this process to someone else?
+    d) few shot
+        forces us to think "this is what good looks like." repeat that.
+
+    forces us to think "how are YOU thinking"
+
+    think first, prompt second
+
+6) meta-prompting
+    get the genai to build you the perfect prompt. get the ai to ask you all the right questions, think it through, and create that perfect prompt that you can refine, and paste into a brand new chat
+
+
+TCREI
+
+https://grow.google/prompting-essentials/
