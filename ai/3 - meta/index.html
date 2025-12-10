@@ -4,118 +4,1138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Globe Location Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="//unpkg.com/globe.gl"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header Section */
+        .header {
+            background: rgba(10, 14, 39, 0.95);
+            padding: 20px 30px;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #818cf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1::before {
+            content: "🌍";
+            font-size: 28px;
+        }
+
+        /* Input Section */
+        .input-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .city-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(30, 35, 60, 0.8);
+            border: 2px solid rgba(99, 102, 241, 0.4);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .city-input:focus {
+            outline: none;
+            border-color: #818cf8;
+            background: rgba(30, 35, 60, 0.95);
+        }
+
+        .city-input::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Globe Container */
+        .globe-container {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        #globe {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 250px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            z-index: 50;
+        }
+
+        .settings-panel h3 {
+            margin-bottom: 15px;
+            color: #818cf8;
+            font-size: 18px;
+        }
+
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .setting-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="range"] {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: rgba(10, 14, 39, 0.95);
+            border-top: 2px solid rgba(99, 102, 241, 0.3);
+            max-height: 40vh;
+            overflow-y: auto;
+            z-index: 90;
+        }
+
+        .table-header {
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(20, 24, 49, 0.95);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-header h2 {
+            font-size: 18px;
+            color: #818cf8;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .locations-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .locations-table th,
+        .locations-table td {
+            padding: 12px 30px;
+            text-align: left;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .locations-table th {
+            background: rgba(20, 24, 49, 0.8);
+            color: #818cf8;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+        }
+
+        .locations-table th:hover {
+            background: rgba(30, 34, 59, 0.8);
+        }
+
+        .locations-table th.sortable::after {
+            content: " ↕";
+            opacity: 0.5;
+        }
+
+        .locations-table th.sort-asc::after {
+            content: " ↑";
+            opacity: 1;
+        }
+
+        .locations-table th.sort-desc::after {
+            content: " ↓";
+            opacity: 1;
+        }
+
+        .locations-table tr:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .editable-cell {
+            cursor: text;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .editable-cell:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .edit-input {
+            background: rgba(30, 35, 60, 0.9);
+            border: 1px solid #818cf8;
+            border-radius: 4px;
+            color: #e0e0e0;
+            padding: 6px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: rgba(224, 224, 224, 0.5);
+            font-style: italic;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(10, 14, 39, 0.98);
+            border: 2px solid rgba(99, 102, 241, 0.5);
+            border-radius: 8px;
+            padding: 16px 24px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .toast.error {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .toast.success {
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal {
+            background: rgba(20, 24, 49, 0.98);
+            border: 2px solid rgba(99, 102, 241, 0.5);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal h3 {
+            margin-bottom: 15px;
+            color: #818cf8;
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            .input-wrapper {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .settings-panel {
+                top: 10px;
+                right: 10px;
+                min-width: 200px;
+                padding: 15px;
+            }
+
+            .locations-table th,
+            .locations-table td {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .table-section {
+                max-height: 50vh;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 14, 39, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1>🌍 3D Globe Location Tracker</h1>
-            <p class="subtitle">Mark your cities and explore the world</p>
-        </header>
+    <div class="app-container">
+        <!-- Header with Input -->
+        <div class="header">
+            <h1>3D Globe Location Tracker</h1>
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="cityInput" 
+                        class="city-input" 
+                        placeholder="Enter city name (e.g., London, Tokyo, New York)"
+                        autocomplete="off"
+                    >
+                </div>
+                <button id="addCityBtn" class="btn">Add Location</button>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Globe Canvas -->
+            <!-- Globe Container -->
             <div class="globe-container">
-                <canvas id="globe-canvas"></canvas>
+                <div id="globe"></div>
                 
-                <!-- Globe Controls -->
-                <div class="globe-controls">
-                    <button id="zoom-in" class="control-btn" title="Zoom In">
-                        <span>+</span>
-                    </button>
-                    <button id="zoom-out" class="control-btn" title="Zoom Out">
-                        <span>−</span>
-                    </button>
-                    <button id="reset-view" class="control-btn" title="Reset View">
-                        <span>⟲</span>
-                    </button>
-                    <button id="toggle-rotation" class="control-btn active" title="Toggle Auto-Rotation">
-                        <span>↻</span>
-                    </button>
-                </div>
-
-                <!-- Loading Indicator -->
-                <div id="loading" class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading Globe...</p>
-                </div>
-            </div>
-
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <!-- City Input Section -->
-                <div class="input-section">
-                    <h2>Add a City</h2>
-                    <div class="search-container">
+                <!-- Settings Panel -->
+                <div class="settings-panel">
+                    <h3>⚙️ Settings</h3>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="autoRotate" checked>
+                            Auto-rotate Globe
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="starField" checked>
+                            Starry Background
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label for="rotationSpeed">Rotation Speed</label>
                         <input 
-                            type="text" 
-                            id="city-input" 
-                            placeholder="Enter city name..."
-                            autocomplete="off"
-                        />
-                        <button id="clear-input" class="clear-btn" title="Clear">×</button>
-                        <div id="autocomplete-list" class="autocomplete-items"></div>
+                            type="range" 
+                            id="rotationSpeed" 
+                            min="0" 
+                            max="2" 
+                            step="0.1" 
+                            value="0.5"
+                        >
                     </div>
-                    <button id="add-city-btn" class="primary-btn">Add City</button>
-                    <div id="input-message" class="message"></div>
+                    <div class="setting-item">
+                        <button id="clearAllBtn" class="btn btn-danger btn-small" style="width: 100%;">
+                            Clear All Data
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Cities Table Section -->
-                <div class="table-section">
-                    <div class="table-header">
-                        <h2>Your Cities</h2>
-                        <button id="clear-all-btn" class="secondary-btn">Clear All</button>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table id="cities-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>City</th>
-                                    <th>Country</th>
-                                    <th>Coordinates</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cities-tbody">
-                                <tr class="empty-state">
-                                    <td colspan="5">
-                                        <div class="empty-message">
-                                            <p>📍 No cities added yet</p>
-                                            <p class="small">Start by entering a city name above</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <!-- Location Table -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2>📍 Locations (<span id="locationCount">0</span>)</h2>
+                <div class="table-actions">
+                    <button id="exportCSV" class="btn btn-secondary btn-small">Export CSV</button>
+                    <button id="exportJSON" class="btn btn-secondary btn-small">Export JSON</button>
                 </div>
-            </aside>
+            </div>
+            <table class="locations-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="order">#</th>
+                        <th class="sortable" data-sort="cityName">City</th>
+                        <th class="sortable" data-sort="latitude">Latitude</th>
+                        <th class="sortable" data-sort="longitude">Longitude</th>
+                        <th class="sortable" data-sort="dateAdded">Date Added</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="locationsTableBody">
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            No locations added yet. Start by entering a city name above!
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast"></div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Confirmation Modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <h3 id="modal-title">Confirm Action</h3>
-            <p id="modal-message">Are you sure?</p>
+    <!-- Modal Template -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 id="modalTitle">Confirm Action</h3>
+            <p id="modalMessage">Are you sure?</p>
             <div class="modal-actions">
-                <button id="modal-cancel" class="secondary-btn">Cancel</button>
-                <button id="modal-confirm" class="danger-btn">Confirm</button>
+                <button id="modalCancel" class="btn btn-secondary">Cancel</button>
+                <button id="modalConfirm" class="btn btn-danger">Confirm</button>
             </div>
         </div>
     </div>
 
-    <!-- Three.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- Application Scripts -->
-    <script src="app.js"></script>
+    <script>
+        // ============================================
+        // Application State & Configuration
+        // ============================================
+        const APP_CONFIG = {
+            STORAGE_KEY: 'globeLocationTracker',
+            VERSION: '1.0.0',
+            GEOCODING_API: 'https://nominatim.openstreetmap.org/search',
+            RATE_LIMIT_DELAY: 1000, // 1 second between requests
+            MAX_LOCATIONS: 100
+        };
+
+        const appState = {
+            locations: [],
+            settings: {
+                globeRotationSpeed: 0.5,
+                autoRotateEnabled: true,
+                starFieldEnabled: true
+            },
+            globe: null,
+            lastGeocodingRequest: 0,
+            sortColumn: 'order',
+            sortDirection: 'asc'
+        };
+
+        // ============================================
+        // Utility Functions
+        // ============================================
+        function generateId() {
+            return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        }
+
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showModal(title, message, onConfirm) {
+            const overlay = document.getElementById('modalOverlay');
+            const titleEl = document.getElementById('modalTitle');
+            const messageEl = document.getElementById('modalMessage');
+            const confirmBtn = document.getElementById('modalConfirm');
+            const cancelBtn = document.getElementById('modalCancel');
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            overlay.classList.remove('hidden');
+
+            const cleanup = () => {
+                overlay.classList.add('hidden');
+                confirmBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+
+            confirmBtn.onclick = () => {
+                onConfirm();
+                cleanup();
+            };
+
+            cancelBtn.onclick = cleanup;
+            overlay.onclick = (e) => {
+                if (e.target === overlay) cleanup();
+            };
+        }
+
+        // ============================================
+        // LocalStorage Management
+        // ============================================
+        function saveToLocalStorage() {
+            try {
+                const data = {
+                    version: APP_CONFIG.VERSION,
+                    locations: appState.locations,
+                    settings: appState.settings
+                };
+                localStorage.setItem(APP_CONFIG.STORAGE_KEY, JSON.stringify(data));
+            } catch (error) {
+                if (error.name === 'QuotaExceededError') {
+                    showToast('Storage quota exceeded. Please delete some locations.', 'error');
+                } else {
+                    showToast('Failed to save data to storage.', 'error');
+                }
+                console.error('LocalStorage error:', error);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const data = localStorage.getItem(APP_CONFIG.STORAGE_KEY);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    appState.locations = parsed.locations || [];
+                    appState.settings = { ...appState.settings, ...(parsed.settings || {}) };
+                    return true;
+                }
+            } catch (error) {
+                showToast('Failed to load saved data.', 'error');
+                console.error('LocalStorage load error:', error);
+            }
+            return false;
+        }
+
+        function clearAllData() {
+            showModal(
+                'Clear All Data',
+                'Are you sure you want to delete all locations? This action cannot be undone.',
+                () => {
+                    appState.locations = [];
+                    saveToLocalStorage();
+                    updateGlobe();
+                    updateTable();
+                    showToast('All locations cleared.', 'success');
+                }
+            );
+        }
+
+        // ============================================
+        // Geocoding Service
+        // ============================================
+        async function geocodeCity(cityName) {
+            // Rate limiting
+            const now = Date.now();
+            const timeSinceLastRequest = now - appState.lastGeocodingRequest;
+            if (timeSinceLastRequest < APP_CONFIG.RATE_LIMIT_DELAY) {
+                await new Promise(resolve => 
+                    setTimeout(resolve, APP_CONFIG.RATE_LIMIT_DELAY - timeSinceLastRequest)
+                );
+            }
+            appState.lastGeocodingRequest = Date.now();
+
+            try {
+                const url = `${APP_CONFIG.GEOCODING_API}?q=${encodeURIComponent(cityName)}&format=json&limit=1`;
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': '3D Globe Location Tracker'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    return {
+                        cityName: data[0].display_name.split(',')[0], // Use cleaner name
+                        latitude: parseFloat(data[0].lat),
+                        longitude: parseFloat(data[0].lon)
+                    };
+                } else {
+                    throw new Error('City not found');
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                throw error;
+            }
+        }
+
+        // ============================================
+        // Location Management
+        // ============================================
+        async function addLocation(cityName) {
+            if (!cityName || cityName.trim() === '') {
+                showToast('Please enter a city name.', 'error');
+                return;
+            }
+
+            if (appState.locations.length >= APP_CONFIG.MAX_LOCATIONS) {
+                showToast(`Maximum of ${APP_CONFIG.MAX_LOCATIONS} locations reached.`, 'error');
+                return;
+            }
+
+            const addBtn = document.getElementById('addCityBtn');
+            const cityInput = document.getElementById('cityInput');
+            
+            // Show loading state
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<span class="spinner"></span> Adding...';
+
+            try {
+                const geocoded = await geocodeCity(cityName);
+                
+                const location = {
+                    id: generateId(),
+                    cityName: geocoded.cityName,
+                    latitude: geocoded.latitude,
+                    longitude: geocoded.longitude,
+                    dateAdded: new Date().toISOString(),
+                    order: appState.locations.length + 1
+                };
+
+                appState.locations.push(location);
+                saveToLocalStorage();
+                updateGlobe();
+                updateTable();
+                
+                // Animate to new location
+                if (appState.globe) {
+                    appState.globe.pointOfView({
+                        lat: location.latitude,
+                        lng: location.longitude,
+                        altitude: 2
+                    }, 1000);
+                }
+
+                cityInput.value = '';
+                showToast(`${location.cityName} added successfully!`, 'success');
+            } catch (error) {
+                showToast(`Failed to add location: ${error.message}`, 'error');
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Add Location';
+            }
+        }
+
+        function deleteLocation(id) {
+            const location = appState.locations.find(loc => loc.id === id);
+            if (!location) return;
+
+            showModal(
+                'Delete Location',
+                `Are you sure you want to delete ${location.cityName}?`,
+                () => {
+                    appState.locations = appState.locations.filter(loc => loc.id !== id);
+                    // Reorder remaining locations
+                    appState.locations.forEach((loc, index) => {
+                        loc.order = index + 1;
+                    });
+                    saveToLocalStorage();
+                    updateGlobe();
+                    updateTable();
+                    showToast('Location deleted.', 'success');
+                }
+            );
+        }
+
+        function updateCityName(id, newName) {
+            const location = appState.locations.find(loc => loc.id === id);
+            if (location && newName.trim()) {
+                location.cityName = newName.trim();
+                saveToLocalStorage();
+                updateGlobe();
+                showToast('City name updated.', 'success');
+            }
+        }
+
+        // ============================================
+        // Globe Visualization
+        // ============================================
+        function initGlobe() {
+            const globe = Globe()
+                .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+                .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+                .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+                .pointAltitude(0.01)
+                .pointColor(() => '#ff6b6b')
+                .pointRadius(0.6)
+                .pointLabel('cityName')
+                .arcColor(() => '#818cf8')
+                .arcDashLength(0.4)
+                .arcDashGap(0.2)
+                .arcDashAnimateTime(3000)
+                .arcStroke(0.5)
+                (document.getElementById('globe'));
+
+            // Enable controls
+            const controls = globe.controls();
+            controls.autoRotate = appState.settings.autoRotateEnabled;
+            controls.autoRotateSpeed = appState.settings.globeRotationSpeed;
+
+            appState.globe = globe;
+            updateGlobe();
+        }
+
+        function updateGlobe() {
+            if (!appState.globe) return;
+
+            // Update points
+            appState.globe.pointsData(appState.locations);
+
+            // Create arcs between sequential locations
+            const arcs = [];
+            for (let i = 0; i < appState.locations.length - 1; i++) {
+                arcs.push({
+                    startLat: appState.locations[i].latitude,
+                    startLng: appState.locations[i].longitude,
+                    endLat: appState.locations[i + 1].latitude,
+                    endLng: appState.locations[i + 1].longitude
+                });
+            }
+            appState.globe.arcsData(arcs);
+        }
+
+        // ============================================
+        // Table Management
+        // ============================================
+        function sortLocations(column) {
+            if (appState.sortColumn === column) {
+                appState.sortDirection = appState.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                appState.sortColumn = column;
+                appState.sortDirection = 'asc';
+            }
+
+            const sorted = [...appState.locations].sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                if (column === 'dateAdded') {
+                    aVal = new Date(aVal).getTime();
+                    bVal = new Date(bVal).getTime();
+                } else if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return appState.sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return appState.sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            updateTable(sorted);
+            updateSortIndicators();
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('.locations-table th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (th.dataset.sort === appState.sortColumn) {
+                    th.classList.add(`sort-${appState.sortDirection}`);
+                }
+            });
+        }
+
+        function updateTable(sortedLocations = null) {
+            const tbody = document.getElementById('locationsTableBody');
+            const locations = sortedLocations || appState.locations;
+            
+            document.getElementById('locationCount').textContent = locations.length;
+
+            if (locations.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            No locations added yet. Start by entering a city name above!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = locations.map(loc => `
+                <tr>
+                    <td>${loc.order}</td>
+                    <td>
+                        <div class="editable-cell" 
+                             contenteditable="true"
+                             data-id="${loc.id}"
+                             data-original="${loc.cityName}"
+                             onblur="handleCityNameEdit(this)"
+                             onkeydown="handleCityNameKeydown(event, this)">
+                            ${loc.cityName}
+                        </div>
+                    </td>
+                    <td>${loc.latitude.toFixed(4)}</td>
+                    <td>${loc.longitude.toFixed(4)}</td>
+                    <td>${formatDate(loc.dateAdded)}</td>
+                    <td>
+                        <button class="btn btn-danger btn-small" onclick="deleteLocation('${loc.id}')">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleCityNameEdit(element) {
+            const id = element.dataset.id;
+            const newName = element.textContent.trim();
+            const original = element.dataset.original;
+
+            if (newName === '') {
+                element.textContent = original;
+                showToast('City name cannot be empty.', 'error');
+            } else if (newName !== original) {
+                updateCityName(id, newName);
+                element.dataset.original = newName;
+            }
+        }
+
+        function handleCityNameKeydown(event, element) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                element.blur();
+            } else if (event.key === 'Escape') {
+                element.textContent = element.dataset.original;
+                element.blur();
+            }
+        }
+
+        // ============================================
+        // Export Functions
+        // ============================================
+        function exportToCSV() {
+            if (appState.locations.length === 0) {
+                showToast('No locations to export.', 'error');
+                return;
+            }
+
+            const headers = ['Order', 'City', 'Latitude', 'Longitude', 'Date Added'];
+            const rows = appState.locations.map(loc => [
+                loc.order,
+                `"${loc.cityName}"`,
+                loc.latitude,
+                loc.longitude,
+                loc.dateAdded
+            ]);
+
+            const csv = [
+                headers.join(','),
+                ...rows.map(row => row.join(','))
+            ].join('\n');
+
+            downloadFile(csv, 'locations.csv', 'text/csv');
+            showToast('CSV exported successfully!', 'success');
+        }
+
+        function exportToJSON() {
+            if (appState.locations.length === 0) {
+                showToast('No locations to export.', 'error');
+                return;
+            }
+
+            const json = JSON.stringify({
+                exportDate: new Date().toISOString(),
+                version: APP_CONFIG.VERSION,
+                locations: appState.locations
+            }, null, 2);
+
+            downloadFile(json, 'locations.json', 'application/json');
+            showToast('JSON exported successfully!', 'success');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // Settings Management
+        // ============================================
+        function updateSettings() {
+            const autoRotate = document.getElementById('autoRotate');
+            const starField = document.getElementById('starField');
+            const rotationSpeed = document.getElementById('rotationSpeed');
+
+            // Update state
+            appState.settings.autoRotateEnabled = autoRotate.checked;
+            appState.settings.starFieldEnabled = starField.checked;
+            appState.settings.globeRotationSpeed = parseFloat(rotationSpeed.value);
+
+            // Update globe
+            if (appState.globe) {
+                const controls = appState.globe.controls();
+                controls.autoRotate = appState.settings.autoRotateEnabled;
+                controls.autoRotateSpeed = appState.settings.globeRotationSpeed;
+            }
+
+            saveToLocalStorage();
+        }
+
+        function initSettings() {
+            document.getElementById('autoRotate').checked = appState.settings.autoRotateEnabled;
+            document.getElementById('starField').checked = appState.settings.starFieldEnabled;
+            document.getElementById('rotationSpeed').value = appState.settings.globeRotationSpeed;
+        }
+
+        // ============================================
+        // Event Listeners
+        // ============================================
+        function initEventListeners() {
+            // Add location
+            document.getElementById('addCityBtn').addEventListener('click', () => {
+                const cityInput = document.getElementById('cityInput');
+                addLocation(cityInput.value);
+            });
+
+            document.getElementById('cityInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addLocation(e.target.value);
+                }
+            });
+
+            // Settings
+            document.getElementById('autoRotate').addEventListener('change', updateSettings);
+            document.getElementById('starField').addEventListener('change', updateSettings);
+            document.getElementById('rotationSpeed').addEventListener('input', updateSettings);
+
+            // Clear all
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllData);
+
+            // Export
+            document.getElementById('exportCSV').addEventListener('click', exportToCSV);
+            document.getElementById('exportJSON').addEventListener('click', exportToJSON);
+
+            // Table sorting
+            document.querySelectorAll('.locations-table th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    sortLocations(th.dataset.sort);
+                });
+            });
+        }
+
+        // ============================================
+        // Initialization
+        // ============================================
+        function init() {
+            // Load data from localStorage
+            loadFromLocalStorage();
+
+            // Initialize settings UI
+            initSettings();
+
+            // Initialize globe
+            initGlobe();
+
+            // Update table
+            updateTable();
+
+            // Setup event listeners
+            initEventListeners();
+
+            // Show welcome message
+            if (appState.locations.length === 0) {
+                setTimeout(() => {
+                    showToast('Welcome! Add your first location to get started.', 'info');
+                }, 500);
+            }
+        }
+
+        // Start the application when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+
+    <!-- Attribution for OpenStreetMap -->
+    <div style="position: fixed; bottom: 10px; left: 10px; font-size: 11px; color: rgba(224, 224, 224, 0.5); z-index: 1000;">
+        Geocoding: © <a href="https://www.openstreetmap.org/copyright" target="_blank" style="color: rgba(129, 140, 248, 0.7);">OpenStreetMap</a> contributors
+    </div>
 </body>
 </html>

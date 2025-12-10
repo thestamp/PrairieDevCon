@@ -1,562 +1,619 @@
 # 3D Globe Location Tracker - Requirements Document
 
-## Project Overview
-A web application that allows users to mark cities on an interactive 3D globe, visualize them with pins and flight trails, and manage their location collection through a professional interface.
+**Project Name:** 3D Globe Location Tracker  
+**Version:** 1.0  
+**Date:** December 9, 2025  
+**Document Status:** Draft
 
 ---
 
-## 1. Functional Requirements
+## 1. Project Overview
 
-### 1.1 City Input & Geocoding
-- **FR-1.1.1**: Application SHALL provide a text input field for users to enter city names
-- **FR-1.1.2**: Application SHALL integrate with a geocoding service (e.g., OpenStreetMap Nominatim, Google Geocoding API) to convert city names to latitude/longitude coordinates
-- **FR-1.1.3**: Application SHALL display autocomplete suggestions as users type city names
-- **FR-1.1.4**: Application SHALL prevent duplicate city entries
-- **FR-1.1.5**: Application SHALL display pertinent information for city selection including:
-  - City name
-  - Country
-  - State/Province (if applicable)
-  - Region/Administrative area
-- **FR-1.1.6**: Application SHALL handle ambiguous city names by presenting a selection list when multiple matches exist
-- **FR-1.1.7**: Application SHALL validate that the entered city exists before adding to the collection
-- **FR-1.1.8**: Application SHALL display appropriate error messages for invalid or unfound cities
+### 1.1 Purpose
+A web-based application that allows users to visualize and track locations on an interactive 3D Earth globe with a starry space background. Users can add cities by name, view them as pins on the globe, and see flight trails connecting the locations in the order they were added.
 
-### 1.2 3D Globe Visualization
-- **FR-1.2.1**: Application SHALL render a realistic 3D Earth globe using WebGL technology
-- **FR-1.2.2**: Globe SHALL include:
-  - High-resolution Earth texture with visible continents, oceans, and geographical features
-  - Atmospheric glow effect around the globe
-  - Bump mapping for terrain elevation (optional enhancement)
-  - Cloud layer (optional enhancement)
-- **FR-1.2.3**: Globe SHALL continuously auto-rotate at a smooth, configurable speed
-- **FR-1.2.4**: Auto-rotation SHALL pause when user interacts with the globe
-- **FR-1.2.5**: Auto-rotation SHALL resume after a configurable idle period (e.g., 3 seconds)
+### 1.2 Scope
+- Interactive 3D globe visualization with city markers
+- City name input with automatic geocoding
+- Persistent data storage using browser localStorage
+- Flight trail visualization connecting sequential locations
+- Tabular list view with management capabilities
+- Professional, modern user interface
 
-### 1.3 Pin Placement & Management
-- **FR-1.3.1**: Application SHALL place a 3D pin/marker at the exact geographical coordinates of each added city
-- **FR-1.3.2**: Pins SHALL be visually distinct and easily visible against the globe surface
-- **FR-1.3.3**: Pins SHALL include:
-  - Icon/marker at the location
-  - Optional label with city name
-  - Hover tooltip showing city details
-- **FR-1.3.4**: Pins SHALL be clickable to display detailed information
-- **FR-1.3.5**: Clicking a pin SHALL display:
-  - City name
-  - Country
-  - Coordinates (latitude/longitude)
-  - Date/time added
-  - Order number in the sequence
-- **FR-1.3.6**: Pins SHALL scale appropriately as the user zooms in/out
-- **FR-1.3.7**: Application SHALL support unlimited number of pins without performance degradation
-
-### 1.4 Flight Trails
-- **FR-1.4.1**: Application SHALL render dotted/dashed flight trails connecting consecutive cities in the order they were added
-- **FR-1.4.2**: Flight trails SHALL follow the great circle path (shortest distance on a sphere) between two points
-- **FR-1.4.3**: Flight trails SHALL have the following visual properties:
-  - Dotted or dashed line style
-  - Distinct color (e.g., bright yellow, cyan, or white) for visibility
-  - Curved arc following the Earth's surface
-  - Smooth animation effect (optional)
-  - Consistent line width
-- **FR-1.4.4**: When a city is deleted, associated flight trails SHALL be recalculated:
-  - Trail FROM the deleted city SHALL be removed
-  - Trail TO the deleted city SHALL be removed
-  - If the deleted city is in the middle of the sequence, a new trail SHALL connect the previous city to the next city
-- **FR-1.4.5**: Flight trails SHALL remain visible during globe rotation and user interaction
-- **FR-1.4.6**: Flight trails SHALL render above the globe surface but below pins
-
-### 1.5 3D Starry Background
-- **FR-1.5.1**: Application SHALL render a 3D starfield as the background
-- **FR-1.5.2**: Starfield SHALL include:
-  - Thousands of stars at varying distances
-  - Multiple star sizes for depth perception
-  - Varying star brightness/opacity
-  - Subtle color variation (white, blue-white, yellow-white)
-- **FR-1.5.3**: Starfield MAY include:
-  - Nebula effects (optional)
-  - Milky Way galaxy visualization (optional)
-  - Slow parallax effect during globe rotation (optional)
-- **FR-1.5.4**: Starfield SHALL remain static relative to the viewport while the globe rotates
-
-### 1.6 Globe Interaction Controls
-- **FR-1.6.1**: Users SHALL be able to manually rotate the globe by clicking and dragging
-- **FR-1.6.2**: Users SHALL be able to zoom in/out using:
-  - Mouse wheel scrolling
-  - Touch pinch gestures (mobile/tablet)
-  - +/- buttons in the UI
-- **FR-1.6.3**: Globe SHALL have zoom limits:
-  - Minimum zoom: entire Earth visible
-  - Maximum zoom: street-level view of city
-- **FR-1.6.4**: Users SHALL be able to pan the camera position
-- **FR-1.6.5**: Globe SHALL support touch gestures on mobile devices:
-  - Single-finger drag to rotate
-  - Two-finger pinch to zoom
-  - Two-finger drag to pan
-- **FR-1.6.6**: Application SHALL include a "Reset View" button to return to default camera position and zoom
-- **FR-1.6.7**: Application SHALL include a "Focus on Pin" feature to automatically rotate and zoom to a selected city
-
-### 1.7 Location Table & Management
-- **FR-1.7.1**: Application SHALL display all added cities in a tabular format
-- **FR-1.7.2**: Table SHALL include the following columns:
-  - Order/Sequence number (#)
-  - City name
-  - Country
-  - State/Province/Region
-  - Coordinates (Lat, Long)
-  - Date added
-  - Actions (Delete button)
-- **FR-1.7.3**: Table SHALL support sorting by any column
-- **FR-1.7.4**: Each row SHALL include a delete button/icon
-- **FR-1.7.5**: Clicking delete SHALL:
-  - Prompt for confirmation
-  - Remove the city from the collection
-  - Remove the pin from the globe
-  - Recalculate flight trails
-  - Update sequence numbers
-  - Update localStorage
-- **FR-1.7.6**: Clicking a table row SHALL:
-  - Highlight the corresponding pin on the globe
-  - Rotate/zoom the globe to focus on that city
-- **FR-1.7.7**: Table SHALL display a message when empty (e.g., "No cities added yet. Start by entering a city name above.")
-- **FR-1.7.8**: Table SHALL be responsive and usable on mobile devices
-- **FR-1.7.9**: Table MAY include bulk actions:
-  - Select multiple cities
-  - Delete selected cities
-  - Export to CSV (optional)
-  - Clear all (with confirmation)
-
-### 1.8 Data Persistence
-- **FR-1.8.1**: Application SHALL store all city data in browser localStorage
-- **FR-1.8.2**: Stored data SHALL include:
-  - City name
-  - Country
-  - State/Province/Region
-  - Latitude
-  - Longitude
-  - Date/time added
-  - Sequence order
-  - Any additional metadata
-- **FR-1.8.3**: Application SHALL load stored cities on page load/refresh
-- **FR-1.8.4**: Application SHALL restore:
-  - All pins on the globe
-  - All flight trails in correct sequence
-  - Table data
-- **FR-1.8.5**: Application SHALL handle localStorage quota exceeded errors gracefully
-- **FR-1.8.6**: Application SHALL provide a clear data/reset option with confirmation
-- **FR-1.8.7**: Data format SHALL be JSON for easy export/import (future enhancement)
+### 1.3 Target Users
+- Travel enthusiasts planning routes
+- Educators demonstrating geography
+- Professionals tracking business locations
+- Anyone visualizing global location data
 
 ---
 
-## 2. Non-Functional Requirements
+## 2. Functional Requirements
 
-### 2.1 Performance
-- **NFR-2.1.1**: Globe SHALL render at minimum 30 FPS (60 FPS target)
-- **NFR-2.1.2**: Application SHALL load initial view within 3 seconds on standard broadband
-- **NFR-2.1.3**: Adding a new city SHALL complete within 1 second
-- **NFR-2.1.4**: Globe interactions (rotate, zoom) SHALL feel smooth and responsive (< 16ms frame time)
-- **NFR-2.1.5**: Application SHALL handle 1000+ cities without significant performance degradation
-- **NFR-2.1.6**: Application SHALL implement level-of-detail (LOD) techniques for pins and trails at different zoom levels
+### 2.1 City Input & Geocoding
 
-### 2.2 Browser Compatibility
-- **NFR-2.2.1**: Application SHALL support the following modern browsers:
-  - Google Chrome (latest 2 versions)
-  - Mozilla Firefox (latest 2 versions)
-  - Microsoft Edge (latest 2 versions)
-  - Safari (latest 2 versions)
-- **NFR-2.2.2**: Application SHALL require WebGL 2.0 support
-- **NFR-2.2.3**: Application SHALL display a message for unsupported browsers
-- **NFR-2.2.4**: Application SHALL be tested on both desktop and mobile browsers
+**FR-2.1.1** The system SHALL provide a text input field for entering city names.
 
-### 2.3 Responsiveness
-- **NFR-2.3.1**: Application SHALL be fully responsive across device sizes:
-  - Desktop (1920x1080 and above)
-  - Laptop (1366x768 to 1920x1080)
-  - Tablet (768x1024)
-  - Mobile (375x667 to 414x896)
-- **NFR-2.3.2**: Globe viewport SHALL resize appropriately for screen size
-- **NFR-2.3.3**: Table SHALL be scrollable or paginated on smaller screens
-- **NFR-2.3.4**: UI controls SHALL be touch-friendly on mobile (minimum 44x44px touch targets)
+**FR-2.1.2** The system SHALL include a submit button or Enter key support to add cities.
 
-### 2.4 Accessibility
-- **NFR-2.4.1**: Application SHOULD follow WCAG 2.1 Level AA guidelines
-- **NFR-2.4.2**: Application SHALL support keyboard navigation:
-  - Tab through interactive elements
-  - Enter/Space to activate buttons
-  - Arrow keys for globe rotation (optional)
-- **NFR-2.4.3**: Application SHALL include appropriate ARIA labels for screen readers
-- **NFR-2.4.4**: Application SHALL maintain sufficient color contrast (4.5:1 minimum)
-- **NFR-2.4.5**: Application SHALL include alt text for all icons and images
+**FR-2.1.3** The system SHALL integrate with a geocoding API (e.g., OpenStreetMap Nominatim, Google Geocoding API) to convert city names to latitude/longitude coordinates.
 
-### 2.5 Usability
-- **NFR-2.5.1**: Application SHALL provide clear visual feedback for all user actions
-- **NFR-2.5.2**: Error messages SHALL be clear, specific, and actionable
-- **NFR-2.5.3**: Application SHALL include a help/instructions section or tooltip system
-- **NFR-2.5.4**: Loading states SHALL be indicated with appropriate spinners/progress indicators
-- **NFR-2.5.5**: Application SHALL prevent accidental data loss with confirmation dialogs
+**FR-2.1.4** The system SHALL validate city name input and require non-empty values.
 
----
+**FR-2.1.5** The system SHALL display a loading indicator while geocoding is in progress.
 
-## 3. User Interface Requirements
+**FR-2.1.6** The system SHALL display an error message if geocoding fails or city is not found.
 
-### 3.1 Professional Design Standards
-- **UI-3.1.1**: Application SHALL use a modern, clean design language
-- **UI-3.1.2**: Color scheme SHALL be:
-  - Dark theme preferred for space/globe visualization
-  - High contrast for readability
-  - Consistent color palette (3-5 primary colors)
-  - Accent colors for interactive elements
-- **UI-3.1.3**: Typography SHALL be:
-  - Professional sans-serif font (e.g., Inter, Roboto, Open Sans)
-  - Clear hierarchy (headings, body text, labels)
-  - Readable font sizes (minimum 14px for body text)
-- **UI-3.1.4**: Application SHALL use consistent spacing and alignment
-- **UI-3.1.5**: Application SHALL include subtle animations and transitions:
-  - Button hover effects
-  - Smooth transitions between states
-  - Loading animations
-  - Pin addition animation
+**FR-2.1.7** The system SHALL handle ambiguous city names by selecting the most prominent result or prompting user selection.
 
-### 3.2 Layout Structure
-- **UI-3.2.1**: Application SHALL use a responsive layout with the following areas:
-  - **Header**: Application title, logo (optional), and main controls
-  - **Main Canvas**: 3D globe visualization (占 60-70% of viewport)
-  - **Sidebar/Panel**: City input and table (占 30-40% of viewport, collapsible on mobile)
-  - **Footer**: Credits, version, help link (optional)
-- **UI-3.2.2**: Layout SHALL adapt to screen orientation (portrait/landscape)
-- **UI-3.2.3**: Sidebar SHALL be collapsible to maximize globe viewing area
-- **UI-3.2.4**: Application SHALL support full-screen mode for globe
+**FR-2.1.8** The system SHALL clear the input field after successful city addition.
 
-### 3.3 Component Design
+### 2.2 3D Globe Visualization
 
-#### 3.3.1 City Input Component
-- Modern search box with icon
-- Autocomplete dropdown with highlighted matching text
-- Clear/reset button (X icon)
-- Add button (primary action color)
-- Loading indicator during geocoding
-- Error message area below input
+**FR-2.2.1** The system SHALL render an interactive 3D Earth globe using a WebGL-based library (e.g., Three.js, globe.gl, Cesium).
 
-#### 3.3.2 Globe Controls Component
-- Floating control panel (semi-transparent)
-- Zoom in/out buttons
-- Reset view button
-- Toggle auto-rotation button
-- Toggle labels button
-- Full-screen toggle button
-- Icons SHALL be intuitive and universally recognizable
+**FR-2.2.2** The globe SHALL include realistic Earth textures with continents, oceans, and geographic features.
 
-#### 3.3.3 Table Component
-- Clean, striped table design
-- Sticky header row
-- Hover effects on rows
-- Icon buttons for actions
-- Sort indicators on column headers
-- Responsive scrolling/pagination
-- Empty state message with illustration
+**FR-2.2.3** The globe SHALL continuously auto-rotate at a configurable speed when not being manually manipulated.
 
-#### 3.3.4 Pin & Trail Visual Design
-- **Pins**: 
-  - 3D marker/pushpin style or location pin icon
-  - Color: Bright red, orange, or custom theme color
-  - Pulsing animation on add (optional)
-  - Glow effect on hover
-- **Trails**:
-  - Dotted line with consistent dash pattern
-  - Color: Contrasting with globe (bright cyan, yellow, or white)
-  - Width: 2-3px
-  - Opacity: 0.7-0.9 for visibility without overwhelming
+**FR-2.2.4** The system SHALL allow users to manually rotate the globe using mouse drag or touch gestures.
 
-### 3.4 Visual Feedback
-- **UI-3.4.1**: Hover states for all interactive elements
-- **UI-3.4.2**: Active/focus states with clear visual indicators
-- **UI-3.4.3**: Disabled states with reduced opacity
-- **UI-3.4.4**: Success indicators (e.g., green checkmark) when city is added
-- **UI-3.4.5**: Loading states with spinners or skeleton screens
-- **UI-3.4.6**: Toast notifications for actions (e.g., "City added", "City deleted")
+**FR-2.2.5** The system SHALL allow users to zoom in/out using mouse wheel or pinch gestures.
+
+**FR-2.2.6** When a new city is added, the globe SHALL automatically rotate to center that location in view with smooth animation.
+
+**FR-2.2.7** The system SHALL display pins/markers at each added city's coordinates.
+
+**FR-2.2.8** Each pin SHALL be visually distinct and clearly visible against the Earth texture.
+
+**FR-2.2.9** Pins SHALL display the city name on hover or click.
+
+### 2.3 Starry Background
+
+**FR-2.3.1** The system SHALL render a 3D starry space background surrounding the globe.
+
+**FR-2.3.2** Stars SHALL be rendered as particle systems with varying sizes and brightness.
+
+**FR-2.3.3** The star field SHALL create a sense of depth and immersion.
+
+**FR-2.3.4** The background SHALL complement the globe without distracting from it.
+
+### 2.4 Flight Trails
+
+**FR-2.4.1** The system SHALL render dotted flight trails connecting cities in the order they were added.
+
+**FR-2.4.2** Each trail SHALL connect from one pin to the next sequentially (creating a continuous route).
+
+**FR-2.4.3** Trails SHALL follow great circle paths (shortest route on a sphere) between locations.
+
+**FR-2.4.4** The dotted line style SHALL be clearly visible against the globe and space background.
+
+**FR-2.4.5** Trails SHALL use an arc/curve visualization rather than straight lines through the Earth.
+
+**FR-2.4.6** When a city is deleted, affected trail segments SHALL be recalculated and redrawn.
+
+### 2.5 Location Table
+
+**FR-2.5.1** The system SHALL display all added locations in a tabular format.
+
+**FR-2.5.2** The table SHALL include the following columns:
+- Order/Index number
+- City name
+- Latitude
+- Longitude
+- Date/Time added
+- Actions (Delete button)
+
+**FR-2.5.3** The table SHALL support sorting by:
+- Order added (default)
+- City name (alphabetical)
+- Date added
+
+**FR-2.5.4** Each row SHALL include a Delete button/icon to remove that location.
+
+**FR-2.5.5** The system SHALL display a confirmation dialog before deleting a location.
+
+**FR-2.5.6** The table SHALL support inline editing of city names.
+
+**FR-2.5.7** The system SHALL provide an "Export" function to download the location list as:
+- CSV format
+- JSON format
+
+**FR-2.5.8** The table SHALL be responsive and usable on mobile devices.
+
+**FR-2.5.9** The table SHALL display a "No locations added yet" message when empty.
+
+### 2.6 Data Persistence
+
+**FR-2.6.1** The system SHALL automatically save all location data to browser localStorage.
+
+**FR-2.6.2** Data SHALL be saved after every add, edit, or delete operation.
+
+**FR-2.6.3** On page load/refresh, the system SHALL retrieve and restore all saved locations from localStorage.
+
+**FR-2.6.4** The system SHALL handle localStorage quota exceeded errors gracefully.
+
+**FR-2.6.5** The system SHALL provide a "Clear All Data" function with confirmation.
+
+**FR-2.6.6** The data format in localStorage SHALL be JSON for easy serialization/deserialization.
 
 ---
 
-## 4. Technical Requirements
+## 3. Technical Requirements
 
-### 4.1 Technology Stack Recommendations
+### 3.1 Technology Stack
 
-#### 4.1.1 3D Graphics Library
-- **Primary Option**: Three.js (recommended)
-  - Mature WebGL library
-  - Excellent documentation
-  - Large community
-  - Built-in controls and helpers
-- **Alternative**: Babylon.js
-  - More game-engine focused
-  - Great performance
+**TR-3.1.1** The application SHALL be built using modern web technologies (HTML5, CSS3, JavaScript/TypeScript).
 
-#### 4.1.2 Framework Options
-- **Vanilla JavaScript**: Suitable for smaller project scope
-- **React**: Recommended for component reusability and state management
-- **Vue.js**: Good alternative with simpler learning curve
-- **Svelte**: Excellent performance, smaller bundle size
+**TR-3.1.2** The system SHALL use a WebGL-capable 3D rendering library:
+- Recommended: Three.js, globe.gl, or Cesium
 
-#### 4.1.3 Additional Libraries
-- **Geocoding**: OpenStreetMap Nominatim API (free) or Google Geocoding API
-- **UI Components**: 
-  - Material-UI (React)
-  - Tailwind CSS (utility-first)
-  - Bootstrap (traditional)
-- **Data Management**: 
-  - LocalStorage API (native)
-  - Optional: localForage for enhanced storage
-- **Animations**: GSAP or Anime.js (optional, for advanced animations)
+**TR-3.1.3** The application SHALL be framework-agnostic or use a modern framework (React, Vue, Svelte) based on developer preference.
 
-### 4.2 Asset Requirements
-- **TR-4.2.1**: Earth texture map (8K resolution recommended)
-- **TR-4.2.2**: Normal/bump map for terrain (optional)
-- **TR-4.2.3**: Specular map for ocean reflections (optional)
-- **TR-4.2.4**: Cloud texture (optional)
-- **TR-4.2.5**: Star texture or particle sprites
-- **TR-4.2.6**: Pin/marker 3D model or sprite
-- **TR-4.2.7**: UI icons (SVG format)
-- **TR-4.2.8**: Fonts (web fonts from Google Fonts or similar)
+**TR-3.1.4** The system SHALL use a professional CSS framework or design system (optional: Tailwind CSS, Bootstrap, Material UI).
 
-### 4.3 Data Structure
-```javascript
-// City Data Model
+### 3.2 Browser Compatibility
+
+**TR-3.2.1** The application SHALL support the latest versions of:
+- Chrome/Edge (Chromium)
+- Firefox
+- Safari
+
+**TR-3.2.2** The application SHALL require WebGL 2.0 support.
+
+**TR-3.2.3** The system SHALL display a warning message for unsupported browsers.
+
+### 3.3 Geocoding API
+
+**TR-3.3.1** The system SHALL integrate with a geocoding API service:
+- Primary recommendation: OpenStreetMap Nominatim (free, no API key required)
+- Alternative: Google Geocoding API, Mapbox Geocoding, LocationIQ
+
+**TR-3.3.2** API credentials/keys SHALL be configurable and not hardcoded.
+
+**TR-3.3.3** The system SHALL implement rate limiting to comply with API usage policies.
+
+**TR-3.3.4** The system SHALL cache geocoding results to minimize API calls.
+
+**TR-3.3.5** The system SHALL handle API failures with appropriate fallback behavior.
+
+### 3.4 Data Model
+
+**TR-3.4.1** Each location SHALL be stored with the following structure:
+
+```json
 {
-  id: "uuid-string",
-  name: "New York",
-  country: "United States",
-  state: "New York",
-  region: "North America",
-  latitude: 40.7128,
-  longitude: -74.0060,
-  dateAdded: "2025-12-09T12:00:00Z",
-  sequenceOrder: 1
-}
-
-// LocalStorage Structure
-{
-  cities: [
-    // Array of city objects
-  ],
-  settings: {
-    autoRotationSpeed: 0.5,
-    lastView: {
-      cameraPosition: {x, y, z},
-      cameraTarget: {x, y, z}
-    }
-  },
-  version: "1.0.0"
+  "id": "unique-identifier",
+  "cityName": "string",
+  "latitude": "number",
+  "longitude": "number",
+  "dateAdded": "ISO 8601 timestamp",
+  "order": "number"
 }
 ```
 
-### 4.4 API Integration
-- **TR-4.4.1**: Geocoding API endpoint configuration
-- **TR-4.4.2**: Rate limiting handling for API calls
-- **TR-4.4.3**: API key management (environment variables)
-- **TR-4.4.4**: Fallback for API failures
-- **TR-4.4.5**: Caching of geocoding results to reduce API calls
+**TR-3.4.2** The complete dataset SHALL be stored as:
 
-### 4.5 Build & Deployment
-- **TR-4.5.1**: Build tool: Vite, Webpack, or Parcel
-- **TR-4.5.2**: Code minification and optimization
-- **TR-4.5.3**: Asset optimization (texture compression, etc.)
-- **TR-4.5.4**: Service Worker for offline capability (optional)
-- **TR-4.5.5**: Hosting: Static hosting (Netlify, Vercel, GitHub Pages)
-- **TR-4.5.6**: CDN for asset delivery
-- **TR-4.5.7**: HTTPS required for geolocation and modern APIs
+```json
+{
+  "locations": [
+    {/* location objects */}
+  ],
+  "settings": {
+    "globeRotationSpeed": "number",
+    "autoRotateEnabled": "boolean"
+  },
+  "version": "string"
+}
+```
+
+### 3.5 Performance
+
+**TR-3.5.1** The globe SHALL render at minimum 30 FPS on devices with moderate GPUs.
+
+**TR-3.5.2** The system SHALL efficiently handle up to 100 location pins without performance degradation.
+
+**TR-3.5.3** Initial page load SHALL complete within 3 seconds on standard broadband connections.
+
+**TR-3.5.4** Asset loading SHALL be optimized (lazy loading, compression, CDN usage).
+
+---
+
+## 4. UI/UX Requirements
+
+### 4.1 Visual Design
+
+**UI-4.1.1** The interface SHALL use a professional, modern design aesthetic.
+
+**UI-4.1.2** The color scheme SHALL complement the space/Earth theme:
+- Dark backgrounds (deep blues, blacks)
+- Accent colors for interactive elements
+- High contrast for readability
+
+**UI-4.1.3** Typography SHALL be clean, legible, and professional.
+
+**UI-4.1.4** Icons SHALL be used consistently throughout the interface.
+
+**UI-4.1.5** The design SHALL follow modern UI/UX best practices and design principles.
+
+### 4.2 Layout
+
+**UI-4.2.1** The layout SHALL consist of:
+- Main 3D globe viewport (primary focus, ~60-70% of screen)
+- City input area (top or sidebar)
+- Location table (bottom or sidebar, collapsible)
+
+**UI-4.2.2** The layout SHALL be responsive and adapt to different screen sizes:
+- Desktop: Side-by-side or overlay layout
+- Tablet: Stacked or tabbed layout
+- Mobile: Full-screen globe with drawer/modal for table
+
+**UI-4.2.3** UI controls SHALL not obstruct the globe view unnecessarily.
+
+**UI-4.2.4** The interface SHALL include a settings panel for:
+- Globe rotation speed adjustment
+- Toggle auto-rotation
+- Toggle star field
+- Clear all data
+
+### 4.3 Interactions
+
+**UI-4.3.1** All interactive elements SHALL provide visual feedback (hover, active, focus states).
+
+**UI-4.3.2** Loading states SHALL be communicated with spinners or progress indicators.
+
+**UI-4.3.3** Error messages SHALL be displayed in a non-intrusive manner (toast notifications or inline alerts).
+
+**UI-4.3.4** Success confirmations SHALL appear briefly after actions.
+
+**UI-4.3.5** Animations and transitions SHALL be smooth and purposeful (not excessive).
+
+### 4.4 Accessibility
+
+**UI-4.4.1** The application SHALL meet WCAG 2.1 Level AA standards where applicable.
+
+**UI-4.4.2** All interactive elements SHALL be keyboard accessible.
+
+**UI-4.4.3** Sufficient color contrast SHALL be maintained for text and UI elements.
+
+**UI-4.4.4** Alternative text SHALL be provided for icons and visual elements.
+
+**UI-4.4.5** ARIA labels SHALL be used for screen reader compatibility.
 
 ---
 
 ## 5. User Stories
 
-### 5.1 Core User Flows
+### 5.1 Adding Locations
 
-**US-1: Add a City**
+**US-5.1.1** As a user, I want to type a city name and have it automatically placed on the globe, so I can quickly visualize locations without knowing coordinates.
+
+**US-5.1.2** As a user, I want to see a flight trail connecting my cities in order, so I can visualize my travel route or connection path.
+
+**US-5.1.3** As a user, I want the globe to automatically rotate to show newly added cities, so I can immediately see where they are located.
+
+### 5.2 Viewing & Interacting
+
+**US-5.2.1** As a user, I want to manually spin and zoom the globe, so I can explore the world and examine locations closely.
+
+**US-5.2.2** As a user, I want to see city names when hovering over pins, so I can identify locations without referring to the table.
+
+**US-5.2.3** As a user, I want an immersive starry background, so the experience feels like viewing Earth from space.
+
+### 5.3 Managing Data
+
+**US-5.3.1** As a user, I want to view all my locations in a sortable table, so I can manage and review my data easily.
+
+**US-5.3.2** As a user, I want to delete specific locations, so I can remove mistakes or outdated entries.
+
+**US-5.3.3** As a user, I want to edit city names in the table, so I can correct typos or update labels.
+
+**US-5.3.4** As a user, I want to export my location list, so I can save it externally or share it with others.
+
+### 5.4 Persistence
+
+**US-5.4.1** As a user, I want my locations to persist when I refresh the page, so I don't lose my work.
+
+**US-5.4.2** As a user, I want to clear all data when needed, so I can start fresh without manually deleting each location.
+
+---
+
+## 6. Non-Functional Requirements
+
+### 6.1 Security
+
+**NFR-6.1.1** The application SHALL validate and sanitize all user inputs to prevent XSS attacks.
+
+**NFR-6.1.2** API keys SHALL be stored securely (environment variables, not in client code if possible).
+
+**NFR-6.1.3** The application SHALL use HTTPS in production.
+
+### 6.2 Reliability
+
+**NFR-6.2.1** The application SHALL handle network failures gracefully without crashing.
+
+**NFR-6.2.2** localStorage operations SHALL include error handling for quota exceeded and access denied scenarios.
+
+**NFR-6.2.3** The system SHALL recover from WebGL context loss events.
+
+### 6.3 Maintainability
+
+**NFR-6.3.1** Code SHALL be well-documented with comments and README.
+
+**NFR-6.3.2** The codebase SHALL follow consistent coding standards and style guides.
+
+**NFR-6.3.3** The application SHALL be modular with separation of concerns.
+
+**NFR-6.3.4** Dependencies SHALL be managed with a package manager (npm, yarn, pnpm).
+
+### 6.4 Usability
+
+**NFR-6.4.1** First-time users SHALL be able to add a location without instructions within 30 seconds.
+
+**NFR-6.4.2** The application SHALL provide helpful tooltips or brief onboarding for key features.
+
+**NFR-6.4.3** Error messages SHALL be clear and actionable.
+
+---
+
+## 7. Constraints & Assumptions
+
+### 7.1 Constraints
+
+- Application runs entirely in the browser (no backend server required initially)
+- Data storage limited by browser localStorage quota (~5-10MB)
+- Geocoding dependent on third-party API availability
+- WebGL support required for 3D rendering
+
+### 7.2 Assumptions
+
+- Users have modern browsers with WebGL support
+- Users have stable internet connection for geocoding API calls
+- Users understand basic geographic concepts (city names, map interaction)
+- Initial release targets desktop/tablet users primarily
+
+---
+
+## 8. Future Enhancements
+
+### 8.1 Potential Features (Out of Scope for v1.0)
+
+- **FE-8.1.1** Click-to-add functionality directly on the globe
+- **FE-8.1.2** Multiple route management (separate trip planning)
+- **FE-8.1.3** Backend integration for cloud storage and multi-device sync
+- **FE-8.1.4** Sharing functionality (generate shareable links)
+- **FE-8.1.5** Advanced filtering and search in location table
+- **FE-8.1.6** Custom pin icons and colors per location
+- **FE-8.1.7** Distance calculation between locations
+- **FE-8.1.8** Animated flight path playback
+- **FE-8.1.9** Integration with real flight data APIs
+- **FE-8.1.10** VR/AR mode support
+- **FE-8.1.11** Collaborative multi-user planning
+- **FE-8.1.12** Import from existing data sources (GPS tracks, travel APIs)
+
+---
+
+## 9. Success Criteria
+
+The project will be considered successful when:
+
+1. Users can add cities by name and see them appear as pins on the globe
+2. Flight trails correctly connect cities in sequential order
+3. The globe is interactive (rotatable, zoomable) with smooth performance
+4. The starry background creates an immersive space environment
+5. All locations persist across browser sessions
+6. The table displays all required information and supports delete/edit/export
+7. The UI is professional, intuitive, and responsive
+8. The application works reliably across supported browsers
+9. User testing shows 90%+ task completion rate for core features
+
+---
+
+## 10. Technical Architecture Overview
+
+### 10.1 Component Structure
+
 ```
-As a user
-I want to add a city to the globe
-So that I can track locations I'm interested in
-
-Acceptance Criteria:
-- I can type a city name in the input field
-- I see autocomplete suggestions as I type
-- I can select a city from suggestions or press Enter
-- The city appears as a pin on the globe
-- The city appears in the table
-- A flight trail connects to the previous city (if exists)
-- Data persists after refresh
+┌─────────────────────────────────────────────┐
+│           Application Shell                 │
+├─────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌───────────────────┐   │
+│  │   Input      │  │   Settings Panel  │   │
+│  │  Component   │  │                   │   │
+│  └──────────────┘  └───────────────────┘   │
+├─────────────────────────────────────────────┤
+│                                             │
+│         3D Globe Viewport                   │
+│  ┌─────────────────────────────────────┐   │
+│  │  - Earth Globe (Three.js/globe.gl) │   │
+│  │  - Star Field Background           │   │
+│  │  - Location Pins                   │   │
+│  │  - Flight Trail Arcs               │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+├─────────────────────────────────────────────┤
+│         Location Table Component            │
+│  - Data Grid with Sort/Filter/Edit          │
+│  - Export Controls                          │
+└─────────────────────────────────────────────┘
 ```
 
-**US-2: View Globe**
-```
-As a user
-I want to view an interactive 3D globe
-So that I can see my cities in a geographical context
+### 10.2 Data Flow
 
-Acceptance Criteria:
-- I see a realistic 3D Earth globe
-- The globe auto-rotates smoothly
-- I see a starry background
-- All my cities appear as pins
-- Flight trails connect cities in sequence
-- Globe is responsive to my screen size
 ```
-
-**US-3: Interact with Globe**
-```
-As a user
-I want to manually control the globe
-So that I can explore different regions and cities
-
-Acceptance Criteria:
-- I can click and drag to rotate the globe
-- I can zoom in/out with mouse wheel or buttons
-- Auto-rotation pauses when I interact
-- Auto-rotation resumes after I stop interacting
-- I can reset the view to default
-- Controls are intuitive and responsive
+User Input (City Name)
+    ↓
+Input Validation
+    ↓
+Geocoding API Call
+    ↓
+Coordinate Resolution
+    ↓
+Add to State + localStorage
+    ↓
+Update Globe (Add Pin, Draw Trail)
+    ↓
+Update Table
+    ↓
+Animate Globe to Location
 ```
 
-**US-4: Delete a City**
-```
-As a user
-I want to delete a city from my collection
-So that I can remove locations I'm no longer interested in
+### 10.3 Key Libraries & Tools
 
-Acceptance Criteria:
-- I can click a delete button in the table
-- I see a confirmation dialog
-- Upon confirmation, the pin disappears from globe
-- The city is removed from the table
-- Flight trails are recalculated
-- Sequence numbers update
-- Changes persist after refresh
+| Purpose | Recommended Options |
+|---------|-------------------|
+| 3D Rendering | Three.js, globe.gl, Cesium |
+| Framework | React, Vue, Svelte, or Vanilla JS |
+| UI Components | Tailwind CSS, Material UI, shadcn/ui |
+| Geocoding | Nominatim OSM, Google Geocoding API |
+| State Management | Context API, Zustand, Redux (optional) |
+| Build Tool | Vite, Webpack, Parcel |
+| Package Manager | npm, yarn, pnpm |
+
+---
+
+## 11. Development Phases
+
+### Phase 1: Core Functionality (MVP)
+- Basic 3D globe with Earth texture
+- City input with geocoding
+- Pin placement on globe
+- Basic localStorage persistence
+- Simple list view (no table features)
+
+### Phase 2: Visual Enhancement
+- Starry background implementation
+- Flight trail rendering
+- Globe auto-rotation and animation
+- Professional UI styling
+
+### Phase 3: Data Management
+- Full table implementation with sorting
+- Delete functionality
+- Inline editing
+- Export features
+
+### Phase 4: Polish & Optimization
+- Performance optimization
+- Enhanced error handling
+- Accessibility improvements
+- Cross-browser testing
+- Responsive design refinement
+
+---
+
+## 12. Testing Requirements
+
+**TEST-12.1** Unit tests SHALL cover core business logic (geocoding, data persistence, coordinate calculations).
+
+**TEST-12.2** Integration tests SHALL verify API interactions and localStorage operations.
+
+**TEST-12.3** UI tests SHALL validate user interactions and visual rendering.
+
+**TEST-12.4** Cross-browser testing SHALL be performed on all supported browsers.
+
+**TEST-12.5** Performance testing SHALL ensure frame rate and load time requirements are met.
+
+**TEST-12.6** Accessibility testing SHALL verify WCAG compliance.
+
+**TEST-12.7** User acceptance testing SHALL confirm all user stories are satisfied.
+
+---
+
+## 13. Documentation Requirements
+
+**DOC-13.1** A README file SHALL include:
+- Project description and features
+- Installation and setup instructions
+- Usage guide
+- Configuration options
+- API key setup instructions
+- Technology stack overview
+
+**DOC-13.2** Inline code documentation SHALL explain complex logic and algorithms.
+
+**DOC-13.3** A user guide SHALL be provided explaining all features and interactions.
+
+---
+
+## Appendix A: API Integration Details
+
+### Nominatim OpenStreetMap Geocoding
+
+**Endpoint:** `https://nominatim.openstreetmap.org/search`
+
+**Request Parameters:**
+- `q`: City name (query)
+- `format`: json
+- `limit`: 1 (or allow selection from multiple)
+
+**Example Request:**
+```
+GET https://nominatim.openstreetmap.org/search?q=London&format=json&limit=1
 ```
 
-**US-5: View City Details**
+**Example Response:**
+```json
+[
+  {
+    "place_id": 123456,
+    "lat": "51.5074",
+    "lon": "-0.1278",
+    "display_name": "London, Greater London, England, United Kingdom",
+    "type": "city"
+  }
+]
 ```
-As a user
-I want to view details about a city
-So that I can see specific information
 
-Acceptance Criteria:
-- I can hover over a pin to see basic info
-- I can click a pin to see detailed info
-- I can click a table row to focus on that city
-- The globe rotates/zooms to show the selected city
-- Information includes name, country, coordinates, and date added
-```
+**Rate Limits:** 1 request per second (respect usage policy)
 
-**US-6: Persist Data**
-```
-As a user
-I want my cities to be saved
-So that I don't lose my data when I refresh or close the browser
+**Attribution Required:** Yes (display "© OpenStreetMap contributors")
 
-Acceptance Criteria:
-- All cities are saved to localStorage automatically
-- Cities are loaded when I visit the site again
-- Globe restores all pins and trails
-- Table shows all my cities
-- No data is lost on refresh
+---
+
+## Appendix B: localStorage Schema
+
+**Key:** `globeLocationTracker`
+
+**Value:**
+```json
+{
+  "version": "1.0.0",
+  "locations": [
+    {
+      "id": "uuid-1",
+      "cityName": "London",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "dateAdded": "2025-12-09T10:30:00.000Z",
+      "order": 1
+    },
+    {
+      "id": "uuid-2",
+      "cityName": "Tokyo",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "dateAdded": "2025-12-09T10:35:00.000Z",
+      "order": 2
+    }
+  ],
+  "settings": {
+    "globeRotationSpeed": 0.5,
+    "autoRotateEnabled": true,
+    "starFieldEnabled": true
+  }
+}
 ```
 
 ---
 
-## 6. Future Enhancements (Optional)
+## Document Revision History
 
-### 6.1 Phase 2 Features
-- **Export/Import**: Export cities to JSON/CSV, import from file
-- **Share Link**: Generate shareable URL with encoded city data
-- **Multiple Routes**: Create named routes (e.g., "Europe Trip", "Business Travel")
-- **Photos**: Attach photos to cities
-- **Notes**: Add personal notes to each city
-- **Visit Status**: Mark cities as visited/planned
-- **Statistics**: Show total distance traveled, number of countries, etc.
-
-### 6.2 Phase 3 Features
-- **Multi-user Support**: Backend with user accounts
-- **Real-time Collaboration**: Share and collaborate on globe with others
-- **Flight Animation**: Animated plane traveling along routes
-- **Weather Integration**: Show current weather at each city
-- **Time Zones**: Display local time for each city
-- **3D Buildings**: Show 3D buildings at high zoom levels
-- **VR Support**: Virtual reality mode for immersive exploration
-
----
-
-## 7. Success Metrics
-
-### 7.1 Technical Metrics
-- **TM-7.1.1**: Page load time < 3 seconds
-- **TM-7.1.2**: Frame rate ≥ 30 FPS (target 60 FPS)
-- **TM-7.1.3**: Zero data loss incidents
-- **TM-7.1.4**: < 5% error rate on geocoding
-- **TM-7.1.5**: Cross-browser compatibility 100% for supported browsers
-
-### 7.2 User Experience Metrics
-- **UX-7.2.1**: Time to add first city < 30 seconds (new user)
-- **UX-7.2.2**: Successful city addition rate > 95%
-- **UX-7.2.3**: User can complete core tasks without help documentation
-- **UX-7.2.4**: Mobile usability score > 90/100
-
----
-
-## 8. Constraints & Assumptions
-
-### 8.1 Constraints
-- **C-8.1.1**: Browser must support WebGL 2.0
-- **C-8.1.2**: JavaScript must be enabled
-- **C-8.1.3**: LocalStorage must be available and enabled
-- **C-8.1.4**: Internet connection required for initial load and geocoding
-- **C-8.1.5**: Geocoding API rate limits apply
-
-### 8.2 Assumptions
-- **A-8.2.1**: Users have modern browsers (released within last 2 years)
-- **A-8.2.2**: Users have basic computer literacy
-- **A-8.2.3**: Users understand geographical concepts (cities, countries, coordinates)
-- **A-8.2.4**: Target audience is comfortable with 3D interfaces
-- **A-8.2.5**: Users have stable internet connection for asset loading
-
----
-
-## 9. Risks & Mitigations
-
-| Risk | Severity | Mitigation |
-|------|----------|------------|
-| WebGL not supported | High | Display clear error message with browser upgrade instructions |
-| Geocoding API rate limit exceeded | Medium | Implement caching, debouncing, and fallback to alternative API |
-| localStorage quota exceeded | Medium | Implement data compression, warn user at 80% capacity, offer export |
-| Poor performance with many cities | Medium | Implement LOD, pin clustering, progressive loading |
-| Browser crashes on mobile | Low | Reduce texture quality on mobile, implement error boundaries |
-| Ambiguous city names | Low | Always show selection UI with country/region context |
-| Network issues during geocoding | Low | Show retry option, queue requests, display helpful error messages |
-
----
-
-## 10. Appendix
-
-### 10.1 Glossary
-- **Geocoding**: Converting address/place name to latitude/longitude coordinates
-- **Great Circle**: Shortest path between two points on a sphere
-- **WebGL**: Web Graphics Library for rendering 3D graphics in browsers
-- **Three.js**: JavaScript library for 3D graphics using WebGL
-- **LOD**: Level of Detail - technique for reducing complexity based on distance
-- **LocalStorage**: Browser API for storing key-value pairs locally
-
-### 10.2 Reference Materials
-- Three.js Documentation: https://threejs.org/docs/
-- WebGL Specification: https://www.khronos.org/webgl/
-- OpenStreetMap Nominatim API: https://nominatim.org/
-- Google Geocoding API: https://developers.google.com/maps/documentation/geocoding
-- WCAG 2.1 Guidelines: https://www.w3.org/WAI/WCAG21/quickref/
-
-### 10.3 Revision History
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | 2025-12-09 | GitHub Copilot | Initial requirements document |
+| 1.0 | 2025-12-09 | System | Initial requirements document |
 
 ---
 
-**Document Status**: Draft for Review  
-**Last Updated**: December 9, 2025  
-**Next Review**: Upon project kickoff
+**Document Status:** Ready for Review  
+**Next Steps:** Review with stakeholders, prioritize requirements, begin design phase

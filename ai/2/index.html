@@ -4,72 +4,723 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Globe City Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            padding: 20px;
+        }
+
+        .ui-panel {
+            pointer-events: auto;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .top-panel {
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        input[type="text"]::placeholder {
+            color: #64748b;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .cities-panel {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            width: 350px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .cities-panel h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #e2e8f0;
+        }
+
+        .city-count {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .delete-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        /* Scrollbar styling */
+        .cities-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cities-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .cities-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .cities-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header Section -->
-        <header class="header">
+    <div id="canvas-container"></div>
+    
+    <div class="ui-overlay">
+        <div class="top-panel ui-panel">
             <h1>🌍 3D Globe City Tracker</h1>
-            <p>Explore the world by pinning your favorite cities</p>
-        </header>
-
-        <!-- Main Content -->
-        <div class="content">
-            <!-- Left Panel: Input and Table -->
-            <div class="panel left-panel">
-                <div class="input-section">
-                    <h2>Add a City</h2>
-                    <div class="input-group">
-                        <input 
-                            type="text" 
-                            id="cityInput" 
-                            placeholder="Enter city name (e.g., Paris, Tokyo)" 
-                            autocomplete="off"
-                        />
-                        <button id="addButton" class="btn-primary">
-                            <span>Add Pin</span>
-                        </button>
-                    </div>
-                    <div id="statusMessage" class="status-message"></div>
-                </div>
-
-                <div class="table-section">
-                    <h2>Pinned Locations</h2>
-                    <div class="table-container">
-                        <table id="locationsTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>City</th>
-                                    <th>Coordinates</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <!-- Dynamically populated -->
-                            </tbody>
-                        </table>
-                        <div id="emptyState" class="empty-state">
-                            <p>No cities pinned yet. Start exploring!</p>
-                        </div>
-                    </div>
-                </div>
+            <p class="subtitle">Add cities to visualize them on an interactive 3D globe</p>
+            
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="cityInput" 
+                    placeholder="Enter city name (e.g., New York, Tokyo, Paris)"
+                    autocomplete="off"
+                />
+                <button id="addBtn">Add City</button>
             </div>
+            
+            <div id="message" class="message"></div>
+        </div>
 
-            <!-- Right Panel: 3D Globe -->
-            <div class="panel globe-panel">
-                <div id="globeViz"></div>
-                <div class="globe-controls">
-                    <button id="resetView" class="btn-secondary">Reset View</button>
-                </div>
-            </div>
+        <div class="cities-panel ui-panel">
+            <h2>📍 Tracked Cities</h2>
+            <div class="city-count" id="cityCount">0 cities</div>
+            <div id="citiesTable"></div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="//unpkg.com/three"></script>
-    <script src="//unpkg.com/globe.gl"></script>
-    <script src="app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Data storage
+        let cities = [];
+        
+        // Three.js setup
+        let scene, camera, renderer, earth, stars, markers = [], curves = [];
+        
+        // Initialize
+        function init() {
+            // Load cities from localStorage
+            loadCities();
+            
+            // Setup Three.js scene
+            setupScene();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Render cities
+            updateUI();
+            renderCitiesOnGlobe();
+            
+            // Start animation
+            animate();
+        }
+
+        function setupScene() {
+            const container = document.getElementById('canvas-container');
+            
+            // Scene
+            scene = new THREE.Scene();
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(
+                60,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.z = 3;
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8);
+            pointLight.position.set(5, 3, 5);
+            scene.add(pointLight);
+            
+            // Create Earth
+            createEarth();
+            
+            // Create stars
+            createStars();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createEarth() {
+            const geometry = new THREE.SphereGeometry(1, 64, 64);
+            
+            // Load Earth texture
+            const textureLoader = new THREE.TextureLoader();
+            
+            // Using a simple material with color and lighting
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x2233ff,
+                emissive: 0x112244,
+                specular: 0x333333,
+                shininess: 10,
+                wireframe: false
+            });
+            
+            // Try to load a real Earth texture from a CDN
+            textureLoader.load(
+                'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
+                (texture) => {
+                    material.map = texture;
+                    material.needsUpdate = true;
+                },
+                undefined,
+                () => {
+                    // Fallback: create a simple blue/green sphere
+                    console.log('Using fallback Earth texture');
+                }
+            );
+            
+            earth = new THREE.Mesh(geometry, material);
+            scene.add(earth);
+        }
+
+        function createStars() {
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 3000;
+            const positions = new Float32Array(starCount * 3);
+            
+            for (let i = 0; i < starCount * 3; i += 3) {
+                const radius = 15 + Math.random() * 30;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                
+                positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i + 2] = radius * Math.cos(phi);
+            }
+            
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const starMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.05,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+        }
+
+        function latLonToVector3(lat, lon, radius = 1.02) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            const y = radius * Math.cos(phi);
+            
+            return new THREE.Vector3(x, y, z);
+        }
+
+        function renderCitiesOnGlobe() {
+            // Clear existing markers and curves
+            markers.forEach(marker => scene.remove(marker));
+            curves.forEach(curve => scene.remove(curve));
+            markers = [];
+            curves = [];
+            
+            if (cities.length === 0) return;
+            
+            // Add markers
+            cities.forEach((city, index) => {
+                const position = latLonToVector3(city.lat, city.lon);
+                
+                // Create pin marker
+                const pinGeometry = new THREE.SphereGeometry(0.02, 16, 16);
+                const pinMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xff3366,
+                    emissive: 0xff1144,
+                    shininess: 100
+                });
+                const pin = new THREE.Mesh(pinGeometry, pinMaterial);
+                pin.position.copy(position);
+                
+                scene.add(pin);
+                markers.push(pin);
+                
+                // Add a small cone for the pin
+                const coneGeometry = new THREE.ConeGeometry(0.015, 0.05, 8);
+                const coneMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xff3366,
+                    emissive: 0xff1144
+                });
+                const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+                cone.position.copy(position);
+                cone.lookAt(0, 0, 0);
+                cone.rotateX(Math.PI);
+                
+                scene.add(cone);
+                markers.push(cone);
+            });
+            
+            // Add flight paths between consecutive cities
+            for (let i = 0; i < cities.length - 1; i++) {
+                const start = latLonToVector3(cities[i].lat, cities[i].lon, 1.01);
+                const end = latLonToVector3(cities[i + 1].lat, cities[i + 1].lon, 1.01);
+                
+                // Create arc between points
+                const curve = createArcBetweenPoints(start, end);
+                scene.add(curve);
+                curves.push(curve);
+            }
+            
+            // Connect last to first if we have more than 2 cities
+            if (cities.length > 2) {
+                const start = latLonToVector3(cities[cities.length - 1].lat, cities[cities.length - 1].lon, 1.01);
+                const end = latLonToVector3(cities[0].lat, cities[0].lon, 1.01);
+                const curve = createArcBetweenPoints(start, end);
+                scene.add(curve);
+                curves.push(curve);
+            }
+        }
+
+        function createArcBetweenPoints(start, end) {
+            const distance = start.distanceTo(end);
+            const mid = new THREE.Vector3()
+                .addVectors(start, end)
+                .multiplyScalar(0.5)
+                .normalize()
+                .multiplyScalar(1.0 + distance * 0.3);
+            
+            const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+            const points = curve.getPoints(50);
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineDashedMaterial({
+                color: 0x00ffff,
+                linewidth: 1,
+                scale: 1,
+                dashSize: 0.02,
+                gapSize: 0.01,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            const line = new THREE.Line(geometry, material);
+            line.computeLineDistances();
+            
+            return line;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate Earth
+            if (earth) {
+                earth.rotation.y += 0.001;
+            }
+            
+            // Slowly rotate stars
+            if (stars) {
+                stars.rotation.y += 0.0001;
+            }
+            
+            // Rotate markers with Earth
+            markers.forEach((marker, index) => {
+                marker.rotation.y += 0.001;
+            });
+            
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // UI Functions
+        function setupEventListeners() {
+            const addBtn = document.getElementById('addBtn');
+            const cityInput = document.getElementById('cityInput');
+            
+            addBtn.addEventListener('click', addCity);
+            cityInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addCity();
+                }
+            });
+        }
+
+        async function addCity() {
+            const input = document.getElementById('cityInput');
+            const cityName = input.value.trim();
+            
+            if (!cityName) {
+                showMessage('Please enter a city name', 'error');
+                return;
+            }
+            
+            // Check if city already exists
+            if (cities.some(c => c.name.toLowerCase() === cityName.toLowerCase())) {
+                showMessage('This city is already in the list', 'error');
+                return;
+            }
+            
+            showMessage('Loading...', 'success');
+            document.getElementById('addBtn').disabled = true;
+            
+            try {
+                const coords = await geocodeCity(cityName);
+                
+                const city = {
+                    id: Date.now(),
+                    name: cityName,
+                    lat: coords.lat,
+                    lon: coords.lon,
+                    addedAt: new Date().toISOString()
+                };
+                
+                cities.push(city);
+                saveCities();
+                updateUI();
+                renderCitiesOnGlobe();
+                
+                input.value = '';
+                showMessage(`✓ ${cityName} added successfully!`, 'success');
+                
+                setTimeout(() => {
+                    hideMessage();
+                }, 3000);
+            } catch (error) {
+                showMessage(error.message, 'error');
+            } finally {
+                document.getElementById('addBtn').disabled = false;
+            }
+        }
+
+        async function geocodeCity(cityName) {
+            // Using Nominatim API (OpenStreetMap) for geocoding
+            const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`;
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'GlobeCityTracker/1.0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Geocoding service unavailable');
+                }
+                
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    throw new Error('City not found. Please try a different name.');
+                }
+                
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lon: parseFloat(data[0].lon)
+                };
+            } catch (error) {
+                throw new Error('Failed to find city location. Please check the name and try again.');
+            }
+        }
+
+        function deleteCity(id) {
+            cities = cities.filter(city => city.id !== id);
+            saveCities();
+            updateUI();
+            renderCitiesOnGlobe();
+            showMessage('City removed', 'success');
+            setTimeout(hideMessage, 2000);
+        }
+
+        function updateUI() {
+            const count = cities.length;
+            document.getElementById('cityCount').textContent = `${count} ${count === 1 ? 'city' : 'cities'}`;
+            
+            const tableContainer = document.getElementById('citiesTable');
+            
+            if (cities.length === 0) {
+                tableContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🌎</div>
+                        <p>No cities yet.<br>Add your first city to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            cities.forEach((city, index) => {
+                html += `
+                    <tr>
+                        <td>
+                            <div>${city.name}</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                                ${city.lat.toFixed(4)}°, ${city.lon.toFixed(4)}°
+                            </div>
+                        </td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteCity(${city.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            tableContainer.innerHTML = html;
+        }
+
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+        }
+
+        function hideMessage() {
+            const message = document.getElementById('message');
+            message.style.display = 'none';
+        }
+
+        // LocalStorage functions
+        function saveCities() {
+            localStorage.setItem('globeCities', JSON.stringify(cities));
+        }
+
+        function loadCities() {
+            const stored = localStorage.getItem('globeCities');
+            if (stored) {
+                try {
+                    cities = JSON.parse(stored);
+                } catch (e) {
+                    console.error('Error loading cities:', e);
+                    cities = [];
+                }
+            }
+        }
+
+        // Start the application
+        init();
+    </script>
 </body>
 </html>
