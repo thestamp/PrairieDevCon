@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Globe Location Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🌍 3D Globe Location Tracker</h1>
+            <p class="subtitle">Mark your cities and explore the world</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Globe Canvas -->
+            <div class="globe-container">
+                <canvas id="globe-canvas"></canvas>
+                
+                <!-- Globe Controls -->
+                <div class="globe-controls">
+                    <button id="zoom-in" class="control-btn" title="Zoom In">
+                        <span>+</span>
+                    </button>
+                    <button id="zoom-out" class="control-btn" title="Zoom Out">
+                        <span>−</span>
+                    </button>
+                    <button id="reset-view" class="control-btn" title="Reset View">
+                        <span>⟲</span>
+                    </button>
+                    <button id="toggle-rotation" class="control-btn active" title="Toggle Auto-Rotation">
+                        <span>↻</span>
+                    </button>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading Globe...</p>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- City Input Section -->
+                <div class="input-section">
+                    <h2>Add a City</h2>
+                    <div class="search-container">
+                        <input 
+                            type="text" 
+                            id="city-input" 
+                            placeholder="Enter city name..."
+                            autocomplete="off"
+                        />
+                        <button id="clear-input" class="clear-btn" title="Clear">×</button>
+                        <div id="autocomplete-list" class="autocomplete-items"></div>
+                    </div>
+                    <button id="add-city-btn" class="primary-btn">Add City</button>
+                    <div id="input-message" class="message"></div>
+                </div>
+
+                <!-- Cities Table Section -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <h2>Your Cities</h2>
+                        <button id="clear-all-btn" class="secondary-btn">Clear All</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="cities-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>City</th>
+                                    <th>Country</th>
+                                    <th>Coordinates</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cities-tbody">
+                                <tr class="empty-state">
+                                    <td colspan="5">
+                                        <div class="empty-message">
+                                            <p>📍 No cities added yet</p>
+                                            <p class="small">Start by entering a city name above</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Confirmation Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">Confirm Action</h3>
+            <p id="modal-message">Are you sure?</p>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="secondary-btn">Cancel</button>
+                <button id="modal-confirm" class="danger-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

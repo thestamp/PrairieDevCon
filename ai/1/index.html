@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Globe - City Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 Interactive Globe Explorer</h1>
+            <p>Track cities around the world</p>
+        </header>
+        
+        <div class="content">
+            <div class="globe-container">
+                <canvas id="globeCanvas"></canvas>
+            </div>
+            
+            <div class="sidebar">
+                <div class="input-section">
+                    <h2>Add Location</h2>
+                    <form id="cityForm">
+                        <input 
+                            type="text" 
+                            id="cityInput" 
+                            placeholder="Enter city name (e.g., Paris, Tokyo)" 
+                            required
+                            autocomplete="off"
+                        >
+                        <button type="submit">Add City</button>
+                    </form>
+                    <div id="errorMessage" class="error-message"></div>
+                </div>
+                
+                <div class="cities-section">
+                    <h2>Cities <span id="cityCount">(0)</span></h2>
+                    <div class="table-container">
+                        <table id="citiesTable">
+                            <thead>
+                                <tr>
+                                    <th>City</th>
+                                    <th>Country</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="citiesTableBody">
+                                <!-- Cities will be added here -->
+                            </tbody>
+                        </table>
+                        <div id="emptyState" class="empty-state">
+                            <p>No cities added yet. Start by adding your first location!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
